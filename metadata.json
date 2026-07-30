@@ -1,0 +1,6 @@
+{
+  "name": "EcoStore",
+  "description": "Modern Premium E-Commerce Website inspired by Apple, Nike, and Zara with soft UI aesthetics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
