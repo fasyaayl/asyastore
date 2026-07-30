@@ -24,11 +24,8 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authInitialMode, setAuthInitialMode] = useState<'login' | 'register'>('login');
 
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    // Initial sample item in cart for quick testing & delight
-    { product: PRODUCTS[0], quantity: 1, selectedColor: 'Oatmeal Beige', selectedSize: 'One Size' }
-  ]);
-  const [wishlistIds, setWishlistIds] = useState<string[]>(['prod-2']);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [wishlistIds, setWishlistIds] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeSection, setActiveSection] = useState<string>('hero');
@@ -71,19 +68,35 @@ export default function App() {
     }, 3000);
   };
 
+  
   // Add to Cart
-  const handleAddToCart = (product: Product, selectedColor?: string, selectedSize?: string) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prev, { product, quantity: 1, selectedColor, selectedSize }];
-    });
-    showToast('cart', `"${product.name}" ditambahkan ke keranjang.`);
-  };
+const handleAddToCart = (
+  product: Product,
+  selectedColor?: string,
+  selectedSize?: string
+) => {
+  if (!currentUser) {
+    showToast('info', 'Silakan login terlebih dahulu.');
+    handleOpenAuth('login');
+    return;
+  }
+
+  setCartItems((prev) => {
+    const existing = prev.find((item) => item.product.id === product.id);
+
+    if (existing) {
+      return prev.map((item) =>
+        item.product.id === product.id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      );
+    }
+
+    return [...prev, { product, quantity: 1, selectedColor, selectedSize }];
+  });
+
+  showToast('cart', `"${product.name}" ditambahkan ke keranjang.`);
+};
 
   // Update Cart Quantity
   const handleUpdateQuantity = (productId: string, delta: number) => {
@@ -108,16 +121,22 @@ export default function App() {
 
   // Toggle Wishlist
   const handleToggleWishlist = (product: Product) => {
-    setWishlistIds((prev) => {
-      if (prev.includes(product.id)) {
-        showToast('info', `"${product.name}" dihapus dari wishlist.`);
-        return prev.filter((id) => id !== product.id);
-      } else {
-        showToast('wishlist', `"${product.name}" disimpan ke wishlist.`);
-        return [...prev, product.id];
-      }
-    });
-  };
+  if (!currentUser) {
+    showToast('info', 'Silakan login terlebih dahulu.');
+    handleOpenAuth('login');
+    return;
+  }
+  
+  setWishlistIds((prev) => {
+    if (prev.includes(product.id)) {
+      showToast('info', `"${product.name}" dihapus dari wishlist.`);
+      return prev.filter((id) => id !== product.id);
+    }
+
+    showToast('wishlist', `"${product.name}" disimpan ke wishlist.`);
+    return [...prev, product.id];
+  });
+};
 
   // Select category & smooth scroll down to products
   const handleCategorySelect = (categoryName: string) => {
@@ -136,12 +155,24 @@ export default function App() {
 
       {/* Sticky Glass Navbar */}
       <Navbar
-        cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
-        wishlistCount={wishlistIds.length}
-        onOpenCart={() => setIsCartOpen(true)}
-        onOpenWishlist={() => setIsWishlistOpen(true)}
-        onOpenUser={handleOpenUserModal}
-        currentUser={currentUser}
+  cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
+  wishlistCount={wishlistIds.length}
+  onOpenCart={() => {
+    if (!currentUser) {
+      handleOpenAuth('login');
+      return;
+    }
+    setIsCartOpen(true);
+  }}
+  onOpenWishlist={() => {
+    if (!currentUser) {
+      handleOpenAuth('login');
+      return;
+    }
+    setIsWishlistOpen(true);
+  }}
+  onOpenUser={handleOpenUserModal}
+  currentUser={currentUser}
         onOpenAuth={handleOpenAuth}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
