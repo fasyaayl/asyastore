@@ -90,7 +90,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <Leaf className="w-5 h-5 text-[#88C070]" />
             </div>
             <span className="font-black text-xl tracking-tight text-[#111111]">
-              EcoStore
+              AsyaStore
             </span>
           </button>
         </div>
